@@ -1,0 +1,13 @@
+* {
+	font-family: 'Play', 'Exo', 'Ubuntu', 'Consolas';
+	word-break: break-all;
+}
+a:hover{
+	text-decoration: none;
+}
+.accordion .card:last-of-type {
+	border-bottom: 1px solid rgba(0,0,0,.125);
+}
+.table {
+	border: 1px solid #ddd;
+}
