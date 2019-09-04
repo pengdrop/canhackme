@@ -1,0 +1,18 @@
+Options -Indexes
+ServerSignature Off
+
+ErrorDocument 403 /index.php
+ErrorDocument 404 /index.php
+
+AddDefaultCharset utf-8
+
+<IfModule mod_rewrite.c>
+	RewriteEngine On
+	RewriteBase /
+
+	RewriteCond %{REQUEST_FILENAME} !-f
+	RewriteCond %{REQUEST_FILENAME} !-d
+	RewriteRule . /index.php [L]
+
+	RewriteRule ^\@import - [F,NC]
+</IfModule>
