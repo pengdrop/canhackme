@@ -94,6 +94,9 @@
 		return in_array(strtolower($user_name), __ADMIN__, true);
 	}
 	function highlight_keyword(string $content, string $keyword): string{
+		if(!isset($keyword{0})){
+			return $content;
+		}
 		return preg_replace('/('.preg_quote($keyword).')/i', '<span class="text-info">$1</span>', $content);
 	}
 

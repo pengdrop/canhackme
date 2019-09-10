@@ -7,9 +7,9 @@
 		'description' => 'Have fun challenges!',
 		'keyword' => 'CanHackMe, Jeopardy, CTF, Wargame, Hacking, Security, Flag',
 		'url' => 'https://canhack.me/',
-		'facebook_app_id' => '343585006287893',
-		'twitter_account' => 'plzdonotsay',
-		'recaptcha_sitekey' => '6LeTPJ0UAAAAAGxR8vTw0O0rONQjk9MnO_AFtp3F',
+		'facebook_app_id' => file_get_contents(__DIR__.'/.facebook_app_id.txt'),
+		'twitter_account' => file_get_contents(__DIR__.'/.twitter_account.txt'),
+		'recaptcha_sitekey' => file_get_contents(__DIR__.'/.recaptcha_sitekey.txt'),
 		'recaptcha_secretkey' => file_get_contents(__DIR__.'/.recaptcha_secretkey.txt'),
 		'wechall_authkey' => file_get_contents(__DIR__.'/.wechall_authkey.txt'),
 	]);
