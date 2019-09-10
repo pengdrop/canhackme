@@ -21,7 +21,7 @@
 						<div class="py-3">
 							<h3 class="text-uppercase"><i class="fa fa-id-card mr-2" aria-hidden="true"></i>Profile</h3>
 							<div class="row mt-3">
-								<div class="col-md-3 d-none d-md-block">
+								<div class="col-md-3 d-none d-md-block" style="max-width:13em">
 									<img class="img-fluid rounded img-thumbnail" src="<?= get_user_profile_image_url($user['user_email'], 512) ?>" alt="<?= htmlentities($user['user_name']) ?>">
 								</div>
 								<div class="col-sm-12 col-md-9">
@@ -31,16 +31,25 @@
 										</a>
 										<h5 class="float-left mb-0 ml-2 py-2"><span class="badge badge-pill badge-success"># <?= htmlentities(Challenges::get_rank_by_user_no($user['user_no'])) ?></span></h5>
 										<h5 class="float-left mb-0 ml-2 py-2"><span class="badge badge-pill badge-secondary"><?= htmlentities($user['user_score']) ?>pt</span></h5>
+<?php if(is_admin_user_name($user['user_name'])): ?>
+										<h5 class="float-left mb-0 ml-2 py-2"><span class="badge badge-pill badge-warning">Admin</span></h5>
+<?php endif; ?>
 									</div>
-<?php if(Users::get_my_user('user_no') === $user['user_no']): ?>
+<?php if(Users::get_my_user('user_no') === $user['user_no'] || is_admin_user_name(Users::get_my_user('user_name'))): ?>
 									<div class="my-1">
 										<i class="fa fa-envelope-o mr-1" aria-hidden="true"></i><a href="mailto:<?= email_encode($user['user_email']) ?>" class="text-muted"><?= email_encode($user['user_email']) ?></a>
 									</div>
 <?php endif; ?>
 									<div class="my-1">
-										<i class="fa fa-clock-o mr-1" aria-hidden="true"></i><span class="text-muted">Signed up at <time data-timestamp="<?= strtotime($user['user_signed_up_at']) ?>"><?= htmlentities($user['user_signed_up_at']) ?></time>.</span>
+										<i class="fa fa-clock-o mr-1" aria-hidden="true"></i><span class="text-muted">Signed up at <time data-timestamp="<?= strtotime($user['user_signed_up_at']) ?>"><?= htmlentities($user['user_signed_up_at']) ?> (UTC)</time>.</span>
 									</div>
-									<blockquote class="card bg-light p-3 my-3"><?= htmlentities($user['user_comment']) ?></blockquote>
+									<blockquote class="card bg-light p-3 my-3">
+<?php if(Users::is_valid_user_url($user['user_comment'])): ?>
+										<a href="<?= htmlentities($user['user_comment']) ?>" target="_blank"><?= htmlentities($user['user_comment']) ?></a>
+<?php else: ?>
+										<?= htmlentities($user['user_comment']) ?>
+<?php endif; ?>
+									</blockquote>
 								</div>
 							</div>
 						</div>
@@ -65,7 +74,7 @@
 										<small class="badge badge-danger ml-1">First Solved</small>
 <?php 		endif; ?>
 									</span>
-									<time data-timestamp="<?= strtotime($chal['chal_solved_at']) ?>"><?= htmlentities($chal['chal_solved_at']) ?></time>
+									<time data-timestamp="<?= strtotime($chal['chal_solved_at']) ?>"><?= htmlentities($chal['chal_solved_at']) ?> (UTC)</time>
 								</li>
 <?php 	endforeach; ?>
 							</ul>

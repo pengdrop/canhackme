@@ -1,4 +1,5 @@
 
+# users
 CREATE TABLE `users` (
 	`user_no` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 	`user_name` TEXT NOT NULL UNIQUE,
@@ -9,6 +10,7 @@ CREATE TABLE `users` (
 	`user_signed_up_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+# challenges
 CREATE TABLE `chals` (
 	`chal_no` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 	`chal_name` TEXT NOT NULL UNIQUE,
@@ -21,6 +23,7 @@ CREATE TABLE `chals` (
 	`chal_uploaded_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+# solve logs
 CREATE TABLE `solvs` (
 	`solv_no` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 	`solv_user_no` INTEGER NOT NULL,
@@ -28,6 +31,7 @@ CREATE TABLE `solvs` (
 	`solv_solved_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+# notifications
 CREATE TABLE `notis` (
 	`noti_no` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 	`noti_contents` TEXT NOT NULL,

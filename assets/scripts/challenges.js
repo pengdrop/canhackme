@@ -1,5 +1,5 @@
 $(function(){
-
+	// flag auth
 	$('#auth-flag-form').submit(function(){
 		var form = $(this);
 		$.ajax({

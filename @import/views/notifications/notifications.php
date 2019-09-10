@@ -1,23 +1,23 @@
 <?php
 
+	# args
+	$page = isset($_GET['p']) && is_string($_GET['p']) ? (int)$_GET['p'] : 1;
+
 	$noti_count = Notifications::get_noti_count();
 
 	$limit = 20;
 	$first_page = 1;
-	$last_page = (int)ceil($noti_count / $limit);
+	$last_page = $noti_count === 0 ? 1 : (int)ceil($noti_count / $limit);
 	$pagination_count = 9;
 
-	if(isset($args['page'])){
-		$page = (int)$args['page'];
-
-		if($page < $first_page){
-			Templater::redirect('/notifications/page/'.urlencode($first_page));
-		}else if($last_page < $page){
-			Templater::redirect('/notifications/page/'.urlencode($last_page));
-		}
-
-	}else{
-		$page = 1;
+	if($page < $first_page){
+		Templater::redirect('/notifications?'.http_build_query([
+			'p' => $first_page,
+		]));
+	}else if($last_page < $page){
+		Templater::redirect('/notifications?'.http_build_query([
+			'p' => $last_page,
+		]));
 	}
 
 	$notis = Notifications::get_notis((int)(($page - 1) * $limit), (int)$limit);
@@ -45,7 +45,7 @@
 <?php 	foreach($notis as $noti): ?>
 								<li class="list-group-item d-flex justify-content-between align-items-center bg-light">
 									<span class="mr-2"><i class="fa fa-bullhorn mr-1" aria-hidden="true"></i> <?= Data::markbb($noti['noti_contents']) ?></span>
-									<time data-timestamp="<?= strtotime($noti['noti_uploaded_at']) ?>"><?= htmlentities($noti['noti_uploaded_at']) ?></time>
+									<time class="d-none d-md-block" data-timestamp="<?= strtotime($noti['noti_uploaded_at']) ?>"><?= htmlentities($noti['noti_uploaded_at']) ?> (UTC)</time>
 								</li>
 <?php 	endforeach; ?>
 							</ul>
@@ -54,10 +54,10 @@
 								<ul class="pagination">
 <?php if($first_page < $page): ?>
 									<li class="page-item">
-										<a class="page-link" href="/notifications/page/<?= urlencode($first_page) ?>" aria-label="First page">&laquo;</a>
+										<a class="page-link" href="/notifications?<?= http_build_query([ 'p' => $first_page ]) ?>" aria-label="First page">&laquo;</a>
 									</li>
 									<li class="page-item">
-										<a class="page-link" href="/notifications/page/<?= urlencode($page - 1) ?>" aria-label="Previous page">&lsaquo;</a>
+										<a class="page-link" href="/notifications?<?= http_build_query([ 'p' => $page - 1 ]) ?>" aria-label="Previous page">&lsaquo;</a>
 									</li>
 <?php endif; ?>
 <?php
@@ -77,7 +77,7 @@
 		if($first_page <= $now_page && $now_page <= $last_page){
 ?>
 									<li class="page-item<?= $now_page === $page ? ' active' : '' ?>">
-										<a class="page-link" href="/notifications/page/<?= urlencode($now_page) ?>" aria-label="Page <?= htmlentities($now_page) ?>"><?= htmlentities($now_page) ?></a>
+										<a class="page-link" href="/notifications?<?= http_build_query([ 'p' => $now_page ]) ?>" aria-label="Page <?= htmlentities($now_page) ?>"><?= htmlentities($now_page) ?></a>
 									</li>
 <?php
 		}
@@ -87,10 +87,10 @@
 ?>
 <?php if($page < $last_page): ?>
 									<li class="page-item">
-										<a class="page-link" href="/notifications/page/<?= urlencode($page + 1) ?>" aria-label="Next page">&rsaquo;</a>
+										<a class="page-link" href="/notifications?<?= http_build_query([ 'p' => $page + 1 ]) ?>" aria-label="Next page">&rsaquo;</a>
 									</li>
 									<li class="page-item">
-										<a class="page-link" href="/notifications/page/<?= urlencode($last_page) ?>" aria-label="Last page">&raquo;</a>
+										<a class="page-link" href="/notifications?<?= http_build_query([ 'p' => $last_page ]) ?>" aria-label="Last page">&raquo;</a>
 									</li>
 <?php endif; ?>
 								</ul>

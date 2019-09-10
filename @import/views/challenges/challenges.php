@@ -68,7 +68,7 @@
 									</div>
 								</div>
 							</div>
-							<form id="auth-flag-form" class="mt-2" action="/challenges/authentication" method="post" data-recaptcha-sitekey="<?= htmlentities(__SITE__['recaptcha_sitekey']) ?>">
+							<form id="auth-flag-form" class="mt-2" action="/challenges/authentication" method="post" data-recaptcha-sitekey="<?= htmlentities(__SITE__['recaptcha_sitekey']) ?>" autocomplete="off">
 								<input type="hidden" name="recaptcha-token">
 								<div class="form-group m-0">
 									<label class="sr-only" for="flag">Flag</label>
@@ -105,7 +105,9 @@
 										<div class="card-body">
 											<div class="text-muted text-right2">
 												<ul class="list-inline mb-0">
-													<li class="list-inline-item mx-0">Author: <a class="text-dark" href="<?= get_user_profile_page_url($chal['chal_author']) ?>"><?= htmlentities($chal['chal_author']) ?></a></li>
+													<li class="list-inline-item mx-0">Publisher: <a class="text-dark" href="<?= get_user_profile_page_url($chal['chal_author']) ?>"><?= htmlentities($chal['chal_author']) ?></a></li>
+													<li class="list-inline-item mx-1">|</li>
+													<li class="list-inline-item mx-0">Published at: <time class="text-dark" data-timestamp="<?= strtotime($chal['chal_uploaded_at']) ?>" data-timeformat="Y-m-d"><?= htmlentities(date('Y-m-d', strtotime($chal['chal_uploaded_at']))) ?> (UTC)</time></li>
 													<li class="list-inline-item mx-1">|</li>
 													<li class="list-inline-item mx-0">Solvers: <span class="text-dark solvers"><?= htmlentities($chal['chal_solvers']) ?></span></li>
 <?php 		if($chal['chal_first_solver'] !== null): ?>

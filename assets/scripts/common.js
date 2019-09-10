@@ -1,15 +1,16 @@
 $(function(){
 	$('[data-toggle="tooltip"]').tooltip();
 
-	$('[data-scroll-top]').click(function() {
-		// scroll to top
+	// scroll to top
+	$('[data-scroll-top]').click(function(){
 		$('html,body').animate({
 			scrollTop: 0,
 		}, 300);
 		return false;
 	});
-	$('[data-scroll-bottom]').click(function() {
-		// scroll to bottom
+
+	// scroll to bottom
+	$('[data-scroll-bottom]').click(function(){
 		$('html,body').animate({
 			scrollTop: $(document).height(),
 		}, 300);
@@ -21,7 +22,6 @@ $(function(){
 		var form = $(this);
 		form.on('refresh-recaptcha', function(){
 			var sitekey = form.data('recaptcha-sitekey');
-
 			var submit = form.find('[type=submit]');
 			if(!submit.attr('disabled')){
 				submit.attr('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Waiting...');
@@ -38,6 +38,7 @@ $(function(){
 		return;
 	});
 
+	// alert
 	$.alert = function(level, message){
 		var alert_area = $('#alert-area'),
 			alert = alert_area.find('.alert'),
@@ -92,6 +93,7 @@ $(function(){
 		input.attr('type', input.attr('type') === 'text' ? 'password' : 'text');
 	});
 
+	// go back webpage
 	$('.go-back').click(function() {
 		var href = $(this).data('href');
 		if(document.referrer.indexOf(location.protocol + '//' + location.host + href) == 0){
@@ -100,25 +102,30 @@ $(function(){
 			location.href = href;
 		}
 	});
-
-	var localize_time = function(timestamp){
-		var t = new Date(timestamp * 1000);
-		if(t.toString() === 'Invalid Date') return;
-
-		var zerofill = function(num, zero_count){
-			return num < (10 ** (zero_count - 1)) ? '0' + num.toString() : num.toString();
-		}
-		var y = zerofill(t.getFullYear(), 4);
-		var m = zerofill(t.getMonth() + 1, 2);
-		var d = zerofill(t.getDate(), 2);
-		var h = zerofill(t.getHours(), 2);
-		var i = zerofill(t.getMinutes(), 2);
-		var s = zerofill(t.getSeconds(), 2);
-		return y + '-' + m + '-' + d + ' ' + h + ':' + i + ':' + s;
-	}
 	$('[data-timestamp]').each(function(){
+		var localize_time = function(timestamp, timeformat){
+			var t = new Date(timestamp * 1000);
+			if(t.toString() === 'Invalid Date') return;
+
+			var zerofill = function(num, zero_count){
+				return num < (10 ** (zero_count - 1)) ? '0' + num.toString() : num.toString();
+			}
+
+			var y = zerofill(t.getFullYear(), 4);
+			var m = zerofill(t.getMonth() + 1, 2);
+			var d = zerofill(t.getDate(), 2);
+			if(timeformat === 'Y-m-d'){
+				return y + '-' + m + '-' + d;
+			}else{
+				var h = zerofill(t.getHours(), 2);
+				var i = zerofill(t.getMinutes(), 2);
+				var s = zerofill(t.getSeconds(), 2);
+				return y + '-' + m + '-' + d + ' ' + h + ':' + i + ':' + s;
+			}
+		}
 		var timestamp = $(this).data('timestamp');
-		var time = localize_time(timestamp);
+		var timeformat = $(this).data('timeformat');
+		var time = localize_time(timestamp, timeformat);
 		if(time != undefined){
 			$(this).html(time);
 		}

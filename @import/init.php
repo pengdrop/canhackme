@@ -1,5 +1,5 @@
 <?php
-	version_compare(PHP_VERSION, '7.3.0', '>=') or die('Not supported PHP version');
+	#version_compare(PHP_VERSION, '7.3.0', '>=') or die('Not supported PHP version (now: '.PHP_VERSION.'). Please install <code>PHP 7.3</code>.');
 
 	ini_set('display_errors', 'off');
 
@@ -10,11 +10,11 @@
 	session_start();
 
 	define('__CSP_NONCE__', base64_encode(random_bytes(20)));
-
 	header('X-Content-Type-Options: nosniff');
 	header('X-Frame-Options: deny');
 	header('X-XSS-Protection: 1; mode=block');
 	header('Content-Security-Policy: base-uri \'self\'; script-src \'nonce-'.__CSP_NONCE__.'\';');
+
 	require __DIR__.'/confs/common.php';
 
 	######################################################################################################################
@@ -26,15 +26,21 @@
 
 	date_default_timezone_set('UTC');
 
-	$do_init = !is_file(__DIR__.'/confs/.common.db');
+	$need_init = !is_file(__DIR__.'/confs/.common.db');
+
 	$db = new SQLite3(__DIR__.'/confs/.common.db');
 	$db->createFunction('HASH', function(string $value){
 		return hash('sha256', $value.__HASH_SALT__);
 	});
-	if($do_init){
-		$db->query(file_get_contents(__DIR__.'/confs/init.sql'));
+
+	if($need_init){
+		if(($init_sql = file_get_contents(__DIR__.'/confs/init.sql')) === false){
+			die('Can\'t found SQL file for initialize database. (path: <code>/confs/init.sql</code>)');
+		}
+		$db->query($init_sql);
+		unset($init_sql);
 	}
-	unset($do_init);
+	unset($need_init);
 
 	Templater::init();
 	Users::init();
@@ -65,16 +71,14 @@
 	}
 	function email_encode(string $email): string{
 		// html encode some characters (at, dot).
-		return strtr($email, ['@' => '&#64;', '.' => '&#46;']);
+		return strtr(htmlentities($email), ['@' => '&#64;', '.' => '&#46;']);
 	}
-
 	function get_challenge_shortcut_page_url(string $chal_name): string{
 		return '/challenges/@'.urlencode(strtolower($chal_name));
 	}
 	function get_challenge_tag_page_url(string $chal_name): string{
 		return '/challenges/tag/'.urlencode(strtolower($chal_name));
 	}
-
 	function get_user_profile_page_url(string $user_name): string{
 		return '/users/@'.urlencode(strtolower($user_name));
 	}
@@ -86,6 +90,12 @@
 				's' => $size,
 			]);
 	}
+	function is_admin_user_name(string $user_name): bool{
+		return in_array(strtolower($user_name), __ADMIN__, true);
+	}
+	function highlight_keyword(string $content, string $keyword): string{
+		return preg_replace('/('.preg_quote($keyword).')/i', '<span class="text-info">$1</span>', $content);
+	}
 
 	######################################################################################################################
 
@@ -94,10 +104,10 @@
 		public static function init(){
 			self::$url_path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 		}
-		public static function get_url_path(){
+		public static function get_url_path(): string{
 			return self::$url_path;
 		}
-		public static function route(string $regex, array $methods, &$args = null){
+		public static function route(string $regex, array $methods, &$args = null): bool{
 			return in_array($_SERVER['REQUEST_METHOD'], $methods, true) && preg_match($regex, self::get_url_path(), $args);
 		}
 		public static function import(string $file, $args = null){
@@ -129,7 +139,7 @@
 	######################################################################################################################
 
 	class Data{
-		public static function resource(string $link, bool $is_full_url = false){
+		public static function resource(string $link, bool $is_full_url = false): string{
 			$parsed_url = parse_url($link);
 
 			// If the link is external URL, return it as it is.
@@ -141,7 +151,7 @@
 			$url_query = $file_path !== false ? '?v='.filemtime($file_path) : '';
 			return $url_prefix.$url_path.$url_query;
 		}
-		public static function markbb(string $value){
+		public static function markbb(string $value): string{
 			$value = htmlentities($value);
 			$value = strtr($value, ["\r" => '', "\n" => '<br>']);
 
@@ -207,7 +217,7 @@
 				self::$my_user = false;
 			}
 		}
-		public static function is_signed(){
+		public static function is_signed(): bool{
 			return self::$is_signed;
 		}
 		public static function get_my_user(string $column = '*'){
@@ -222,7 +232,7 @@
 				return false;
 			}
 		}
-		public static function get_unsigned_token(){
+		public static function get_unsigned_token(): string{
 			return base64_encode(sha1(json_encode([$_SERVER['REMOTE_ADDR'], $_SERVER['HTTP_USER_AGENT']]), true));
 		}
 		public static function get_signed_token(){
@@ -320,22 +330,22 @@
 			while($user = $res->fetchArray(SQLITE3_ASSOC)) $users[] = $user;
 			return $users;
 		}
-		public static function is_valid_user_name($user_name){
+		public static function is_valid_user_name($user_name): bool{
 			return is_string($user_name) && preg_match('/\A[a-zA-Z0-9_-]{5,20}\z/', $user_name);
 		}
-		public static function is_valid_user_url($user_url){
+		public static function is_valid_user_url($user_url): bool{
 			return is_string($user_url) && preg_match('/\A(https?\:\/\/|\/\/).+\z/i', $user_url) && filter_var($user_url, FILTER_VALIDATE_URL);
 		}
-		public static function is_valid_user_email($user_email){
+		public static function is_valid_user_email($user_email): bool{
 			return is_string($user_email) && filter_var($user_email, FILTER_VALIDATE_EMAIL);
 		}
-		public static function is_valid_user_comment($user_comment){
+		public static function is_valid_user_comment($user_comment): bool{
 			return is_string($user_comment) && ($len = mb_strlen($user_comment)) !== false && 0 <= $len && $len <= 50;
 		}
-		public static function is_valid_user_password($user_password){
+		public static function is_valid_user_password($user_password): bool{
 			return is_string($user_password) && ($len = mb_strlen($user_password)) !== false && 6 <= $len && $len <= 50;
 		}
-		public static function is_exists_user_name(string $user_name){
+		public static function is_exists_user_name(string $user_name): bool{
 			global $db;
 			$stmt = $db->prepare('
 				SELECT
@@ -355,7 +365,7 @@
 			if($user === false) return false;
 			return true;
 		}
-		public static function is_exists_user_email(string $user_email){
+		public static function is_exists_user_email(string $user_email): bool{
 			global $db;
 			$stmt = $db->prepare('
 				SELECT
@@ -375,7 +385,7 @@
 			if($user === false) return false;
 			return true;
 		}
-		public static function do_sign_in(string $user_name, string $user_password){
+		public static function do_sign_in(string $user_name, string $user_password): bool{
 			global $db;
 			$stmt = $db->prepare('
 				SELECT
@@ -399,7 +409,7 @@
 			self::init();
 			return true;
 		}
-		public static function do_sign_up(string $user_name, string $user_email, string $user_password, string $user_comment){
+		public static function do_sign_up(string $user_name, string $user_email, string $user_password, string $user_comment): bool{
 			global $db;
 			$stmt = $db->prepare('
 				INSERT INTO
@@ -423,21 +433,24 @@
 		public static function do_sign_out(){
 			unset($_SESSION['user_no'], $_SESSION['signed_token']);
 		}
-		public static function get_user_count(){
+		public static function get_user_count(string $keyword = ''){
 			global $db;
 			$stmt = $db->prepare('
 				SELECT
 					COUNT(*) AS `count`
 				FROM
 					`users`
+				WHERE
+					INSTR(LOWER(`user_name`), LOWER(:keyword)) OR INSTR(LOWER(`user_comment`), LOWER(:keyword))
 			');
+			$stmt->bindParam(':keyword', $keyword);
 			$res = $stmt->execute();
 			if($res === false) return false;
 			$user = $res->fetchArray(SQLITE3_ASSOC);
 			if($user === false) return false;
 			return $user['count'];
 		}
-		public static function update_my_user(string $user_name, string $user_email, string $user_password, string $user_comment){
+		public static function update_my_user(string $user_name, string $user_email, string $user_password, string $user_comment): bool{
 			global $db;
 			$stmt = $db->prepare('
 				UPDATE
@@ -489,8 +502,8 @@
 		public static function get_chal_tags(){
 			return self::$chal_tags;
 		}
-		public static function is_valid_chal_flag($chal_flag){
-			return is_string($chal_flag) && preg_match('/\ACanHackMe\{[a-zA-Z0-9_]{10,50}\}\z/', $chal_flag);
+		public static function is_valid_chal_flag($chal_flag): bool{
+			return is_string($chal_flag) && preg_match('/\A[a-zA-Z0-9_]+?\{[a-zA-Z0-9_]{10,50}\}\z/', $chal_flag);
 		}
 		public static function get_chal_by_chal_flag(string $chal_flag){
 			global $db;
@@ -538,7 +551,7 @@
 			while($chal = $res->fetchArray(SQLITE3_ASSOC)) $chals[] = $chal;
 			return $chals;
 		}
-		public static function is_solved_chal(int $chal_no){
+		public static function is_solved_chal(int $chal_no): bool{
 			global $db;
 			$stmt = $db->prepare('
 				SELECT
@@ -558,7 +571,7 @@
 			if($chal === false) return false;
 			return true;
 		}
-		public static function do_solve_chal(int $chal_no, int $chal_score){
+		public static function do_solve_chal(int $chal_no, int $chal_score): bool{
 			global $db;
 			$stmt = $db->prepare('
 				INSERT INTO `solvs`
@@ -657,7 +670,7 @@
 			}
 			return false;
 		}
-		public static function get_ranks(int $limit_start = 0, int $limit_end = 30){
+		public static function get_ranks(string $keyword = '', int $limit_start = 0, int $limit_end = 30){
 			global $db;
 			$stmt = $db->prepare('
 				SELECT
@@ -668,12 +681,15 @@
 					(SELECT `solv_solved_at` FROM `solvs` WHERE `solv_user_no`=`user_no` ORDER BY `solv_no` DESC LIMIT 1) AS `user_last_solved_at`
 				FROM
 					`users`
+				WHERE
+					INSTR(LOWER(`user_name`), LOWER(:keyword)) OR INSTR(LOWER(`user_comment`), LOWER(:keyword))
 				ORDER BY
 					`user_score` DESC,
 					`user_last_solved_at` ASC
 				LIMIT
 					:limit_start, :limit_end
 			');
+			$stmt->bindParam(':keyword', $keyword);
 			$stmt->bindParam(':limit_start', $limit_start);
 			$stmt->bindParam(':limit_end', $limit_end);
 			$res = $stmt->execute();
@@ -682,7 +698,7 @@
 			while($rank = $res->fetchArray(SQLITE3_ASSOC)) $ranks[] = $rank;
 			return $ranks;
 		}
-		public static function get_solvs(int $limit_start = 0, int $limit_end = 30){
+		public static function get_solvs(string $keyword = '', int $limit_start = 0, int $limit_end = 30){
 			global $db;
 			$stmt = $db->prepare('
 				SELECT
@@ -697,12 +713,14 @@
 					`chals`,
 					`users`
 				WHERE
-					`user_no`=`solv_user_no` AND `chal_no`=`solv_chal_no`
+					`user_no`=`solv_user_no` AND `chal_no`=`solv_chal_no` AND
+					(INSTR(LOWER(`user_name`), LOWER(:keyword)) OR INSTR(LOWER(`chal_title`), LOWER(:keyword)))
 				ORDER BY
 					`solv_no` DESC
 				LIMIT
 					:limit_start, :limit_end
 			');
+			$stmt->bindParam(':keyword', $keyword);
 			$stmt->bindParam(':limit_start', $limit_start);
 			$stmt->bindParam(':limit_end', $limit_end);
 			$res = $stmt->execute();
@@ -725,14 +743,20 @@
 			if($chal === false) return false;
 			return $chal['chal_count'];
 		}
-		public static function get_solv_count(){
+		public static function get_solv_count(string $keyword = ''){
 			global $db;
 			$stmt = $db->prepare('
 				SELECT
 					COUNT(*) AS `solv_count`
 				FROM
-					`solvs`
+					`solvs`,
+					`chals`,
+					`users`
+				WHERE
+					`user_no`=`solv_user_no` AND `chal_no`=`solv_chal_no` AND
+					(INSTR(LOWER(`user_name`), LOWER(:keyword)) OR INSTR(LOWER(`chal_title`), LOWER(:keyword)))
 			');
+			$stmt->bindParam(':keyword', $keyword);
 			$res = $stmt->execute();
 			if($res === false) return false;
 			$solv = $res->fetchArray(SQLITE3_ASSOC);
