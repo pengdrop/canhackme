@@ -6,7 +6,7 @@
 
 ## What's this?
 
-![main](https://i.imgur.com/xdRTHZ5.png)
+![main](https://i.imgur.com/ItpTYc2.png)
 
 CanHackMe is jeopardy CTF platform.
 
