@@ -9,8 +9,11 @@
 		'url' => 'https://canhack.me/',
 		'facebook_app_id' => file_get_contents(__DIR__.'/.facebook_app_id.txt'),
 		'twitter_account' => file_get_contents(__DIR__.'/.twitter_account.txt'),
+
+		'use_recaptcha' => false,
 		'recaptcha_sitekey' => file_get_contents(__DIR__.'/.recaptcha_sitekey.txt'),
 		'recaptcha_secretkey' => file_get_contents(__DIR__.'/.recaptcha_secretkey.txt'),
+
 		'wechall_authkey' => file_get_contents(__DIR__.'/.wechall_authkey.txt'),
 	]);
 

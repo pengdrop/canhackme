@@ -6,9 +6,11 @@
 	$args_head = [
 		'title' => 'Sign up - '.__SITE__['title'],
 		'active' => 'users',
-		'scripts' => [
+		'scripts' => is_use_recaptcha() ? [
 			'/assets/scripts/users.js',
 			'https://www.google.com/recaptcha/api.js?render='.urlencode(__SITE__['recaptcha_sitekey']),
+		] : [
+			'/assets/scripts/users.js',
 		],
 	];
 	$args_foot = [
@@ -20,8 +22,15 @@
 					<main>
 						<div class="py-3">
 							<h3 class="text-uppercase"><i class="fa fa-user-plus mr-2" aria-hidden="true"></i>Sign up</h3>
-							<form id="sign-up-form" class="mt-3" action="/users/sign-up" method="post" data-recaptcha-sitekey="<?= htmlentities(__SITE__['recaptcha_sitekey']) ?>">
+							<form id="sign-up-form" class="mt-3" 
+								action="/users/sign-up" method="post" 
+<?php 	if(is_use_recaptcha()): ?>
+								data-recaptcha-sitekey="<?= htmlentities(__SITE__['recaptcha_sitekey']) ?>"
+<?php 	endif; ?>
+							>
+<?php 	if(is_use_recaptcha()): ?>
 								<input type="hidden" name="recaptcha-token">
+<?php 	endif; ?>
 								<div class="form-group">
 									<label for="name">Name <span class="text-danger">*</span></label>
 									<div class="input-group">
@@ -72,9 +81,15 @@
 										<a href="/users/sign-in" tabindex="9">Have an account already?</a>
 									</div>
 									<div class="float-right">
-										<button type="submit" class="btn btn-secondary" tabindex="8" disabled>
+<?php 	if(is_use_recaptcha()): ?>
+										<button type="submit" class="btn btn-secondary" disabled>
 											<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Waiting...
 										</button>
+<?php 	else: ?>
+										<button type="submit" class="btn btn-secondary">
+											<i class="fa fa-check" aria-hidden="true"></i> Submit
+										</button>
+<?php 	endif; ?>
 									</div>
 								</div>
 							</form>

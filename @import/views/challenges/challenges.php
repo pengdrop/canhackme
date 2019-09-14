@@ -19,9 +19,11 @@
 	$args_head = [
 		'title' => 'Challenges - '.__SITE__['title'],
 		'active' => 'challenges',
-		'scripts' => [
+		'scripts' => is_use_recaptcha() ? [
 			'/assets/scripts/challenges.js',
 			'https://www.google.com/recaptcha/api.js?render='.urlencode(__SITE__['recaptcha_sitekey']),
+		] : [
+			'/assets/scripts/challenges.js',
 		],
 	];
 	$args_foot = [
@@ -68,8 +70,15 @@
 									</div>
 								</div>
 							</div>
-							<form id="auth-flag-form" class="mt-2" action="/challenges/authentication" method="post" data-recaptcha-sitekey="<?= htmlentities(__SITE__['recaptcha_sitekey']) ?>" autocomplete="off">
+							<form id="auth-flag-form" class="mt-2" 
+								action="/challenges/authentication" method="post" 
+<?php 	if(is_use_recaptcha()): ?>
+								data-recaptcha-sitekey="<?= htmlentities(__SITE__['recaptcha_sitekey']) ?>"
+<?php 	endif; ?>
+								autocomplete="off">
+<?php 	if(is_use_recaptcha()): ?>
 								<input type="hidden" name="recaptcha-token">
+<?php 	endif; ?>
 								<div class="form-group m-0">
 									<label class="sr-only" for="flag">Flag</label>
 									<div class="input-group">
@@ -80,9 +89,15 @@
 											aria-label="Flag" aria-describedby="addon-flag" placeholder="CanHackMe{ ... }" 
 											data-toggle="tooltip" data-placement="top" title="Enter the flag you captured.">
 										<div class="input-group-append">
+<?php 	if(is_use_recaptcha()): ?>
 											<button type="submit" class="btn btn-secondary" disabled>
 												<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Waiting...
 											</button>
+<?php 	else: ?>
+											<button type="submit" class="btn btn-secondary">
+												<i class="fa fa-check" aria-hidden="true"></i> Submit
+											</button>
+<?php 	endif; ?>
 										</div>
 									</div>
 								</div>

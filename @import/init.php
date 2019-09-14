@@ -48,6 +48,12 @@
 
 	######################################################################################################################
 
+	function is_use_recaptcha(): bool{
+		return isset(__SITE__['use_recaptcha'], __SITE__['recaptcha_sitekey'], __SITE__['recaptcha_secretkey']) && 
+			__SITE__['use_recaptcha'] === true && 
+			is_string(__SITE__['recaptcha_sitekey']) &&
+			is_string(__SITE__['recaptcha_secretkey']);
+	}
 	function is_valid_recaptcha_token($token): bool{
 		if(!is_string($token) || !isset($token{0})){
 			return false;

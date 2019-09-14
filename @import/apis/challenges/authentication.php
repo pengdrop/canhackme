@@ -1,13 +1,15 @@
 <?php
 
-	if(!isset($_POST['recaptcha-token'], $_POST['flag'])){
+	if(!isset($_POST['flag'])){
 		$res = ['result' => 'error'];
 		goto tail;
 	}
 
-	if(!is_valid_recaptcha_token($_POST['recaptcha-token'])){
-		$res = ['result' => 'invalid_token'];
-		goto tail;
+	if(is_use_recaptcha()){
+		if(!isset($_POST['recaptcha-token']) || !is_valid_recaptcha_token($_POST['recaptcha-token'])){
+			$res = ['result' => 'invalid_token'];
+			goto tail;
+		}
 	}
 
 	if(!Users::is_signed()){
