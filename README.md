@@ -1,4 +1,4 @@
-[![Rawsec's CyberSecurity Inventory](https://inventory.rawsec.ml/img/badges/Rawsec-inventoried-FF5050_flat.svg)](https://inventory.rawsec.ml/ctf_platforms.html#CanHackMe)
+[![Rawsec's CyberSecurity Inventory](https://inventory.raw.pm/img/badges/Rawsec-inventoried-FF5050_flat.svg)](https://inventory.raw.pm/ctf_platforms.html#CanHackMe)
 [![GitHub stars](https://img.shields.io/github/stars/safflower/canhackme.svg)](https://github.com/safflower/canhackme/stargazers)
 [![GitHub license](https://img.shields.io/github/license/safflower/canhackme.svg)](https://github.com/safflower/canhackme/blob/master/LICENSE)
 
